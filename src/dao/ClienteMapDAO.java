@@ -49,7 +49,7 @@ public class ClienteMapDAO implements IClienteDAO {
 		}
 		
 	}
-
+ 
 	@Override
 	public Cliente consultar(long cpf) {
 			return this.map.get(cpf);
