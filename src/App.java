@@ -1,7 +1,5 @@
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+
 
 import javax.swing.JOptionPane;
 
@@ -16,10 +14,11 @@ public class App {
 	public static void main(String args[]) {
 		
 		iClienteDAO = new ClienteMapDAO();
-		
-	
-		
-		String opcao = JOptionPane.showInputDialog(
+		boolean continuar = true;
+                
+                
+                while(continuar){
+                    String opcao = JOptionPane.showInputDialog(
 			null,
 			"Digite 1 para cadastro,"
 					+ "2 para consulta" +
@@ -31,22 +30,35 @@ public class App {
 		
 		
 		
-		opcao = VerificaOpcao(opcao);
-			
-			
-		if ("1".equals(opcao)) {
-			cadastrar(iClienteDAO);
-			System.exit(0);
-		}
-		
-		if ("2".equals(opcao)) {
-			consultarLista(iClienteDAO);				
-			
-		}
-		
-		if("5".equals(opcao)) {
-			sair();
-		}
+                    opcao = VerificaOpcao(opcao);
+
+
+                    if ("1".equals(opcao)) {
+                            cadastrar(iClienteDAO);
+
+                    }
+
+                    if ("2".equals(opcao)) {
+                            consultarLista(iClienteDAO);				
+
+                    }
+
+                    if ("3".equals(opcao)) {
+                            excluirDaLista(iClienteDAO);				
+
+                    }
+
+                    if ("4".equals(opcao)) {
+                            alterarDaLista(iClienteDAO);				
+
+                    }
+
+                    if("5".equals(opcao)) {
+                            sair();
+                            continuar = false;
+                    }
+                
+                }
 	}
 	
 	public static String VerificaOpcao(String opcao) {
@@ -96,9 +108,6 @@ public class App {
 		
 		String[] dadosSeparados = dados.split(",");
 		
-		System.out.print("Dados serapados" + Arrays.toString(dadosSeparados));
-		System.out.print("Tamanho: " + dadosSeparados.length);
-		
 		if (dadosSeparados.length != 7) {
 			JOptionPane.showMessageDialog(
 					null,
@@ -117,14 +126,27 @@ public class App {
 				dadosSeparados[6]);
 		
 		if (cliente != null) {
-			iClienteDAO.cadastrar(cliente);
-			JOptionPane.showMessageDialog(
-					null,
-					"Cadastro realizado com sucesso",
-					"Cadastro com sucesso",
+                    iClienteDAO.cadastrar(cliente);
+                    String cadastro = JOptionPane.showInputDialog(
+                            null,
+                            "Cadastro realizado com sucesso, deseja cadastrar mais 1 para sim e 2 para não?",
+                            "Cadastro com sucesso",
+                            JOptionPane.INFORMATION_MESSAGE);
+                    
+                    if ("1".equals(cadastro)) {
+                        cadastrar(iClienteDAO);
+                        
+                    } 
+                } 
+                
+                else {
+                    JOptionPane.showMessageDialog(null, 
+					"Erro ao cadastrar, tente novamente",
+					"Pedir para cadastrar",
 					JOptionPane.INFORMATION_MESSAGE);
-			
-		}
+                    
+                   
+                }
 		
 	}
 
@@ -146,10 +168,77 @@ public class App {
 				"Buscar",
 				JOptionPane.INFORMATION_MESSAGE);
 		
-			JOptionPane.showMessageDialog(null, iClienteDAO.consultar(
-					Long.valueOf(dados.trim()))
+			JOptionPane.showMessageDialog(null, iClienteDAO.consultar(Long.parseLong(dados.trim()))
 				);
 			
 		} 
+
+        private static void excluirDaLista(IClienteDAO iClienteDAO){
+           if(iClienteDAO.buscarTodos().size() <= 0) {
+			
+			JOptionPane.showMessageDialog(null, 
+					"A lista ainda está vazia, porfavor realize o cadastro",
+					"Pedir para cadastrar",
+					JOptionPane.INFORMATION_MESSAGE);
+			
+			cadastrar(iClienteDAO);
+			
+		}
+       
+           String dado = JOptionPane.showInputDialog(null, 
+					"Digite o CPF que deseja excluir",
+					"Pedir para cadastrar",
+					JOptionPane.INFORMATION_MESSAGE);
+           
+           Cliente cliente = iClienteDAO.consultar(Long.parseLong(dado.trim()));
+           
+            if (cliente != null) {
+                iClienteDAO.excluir(Long.valueOf(dado.trim()));
+                JOptionPane.showMessageDialog(null, "Cliente excluído com sucesso", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Cliente não encontrado", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        
+			
+			
+       }
+
+        private static void alterarDaLista(IClienteDAO iClienteDAO){
+            String cpf = JOptionPane.showInputDialog(null, 
+				"Digite o CPF do cliente",
+				"Pedir cpf",
+				JOptionPane.INFORMATION_MESSAGE);
+            
+            Cliente clienteExiste = iClienteDAO.consultar(Long.parseLong(cpf.trim()));
+            
+            if (clienteExiste != null) {
+                String dados = JOptionPane.showInputDialog(null, 
+				"Digite os dados do cliente  separados por vírgulas, ex: Nome, CPF, Telefone, Endereço, Número, Cidade, Estado",
+				"Alterar",
+				JOptionPane.INFORMATION_MESSAGE);
+		
+		
+                String[] dadosSeparados = dados.split(",");
+
+                Cliente cliente = new Cliente(dadosSeparados[0], 
+                                    dadosSeparados[1],
+                                    dadosSeparados[2],
+                                    dadosSeparados[3],
+                                    dadosSeparados[4],
+                                    dadosSeparados[5],
+                                    dadosSeparados[6]);
+
+                iClienteDAO.alterar(cliente);
+            
+            } else {
+                JOptionPane.showMessageDialog(null,
+                "Cliente não encontrado",
+                "Erro",
+                JOptionPane.ERROR_MESSAGE);
+            
+            }
+        }
+
+
 }
 
